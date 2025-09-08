@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* Neutralize Vite template defaults so Tailwind utilities control visuals */
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
