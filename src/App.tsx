@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, X, Edit3, Trash2, Search, Moon, Sun, Download, Upload } from 'lucide-react';
 // Utility functions for localStorage
 const STORAGE_KEY = 'trello-clone-data';
+// Removed CURRENT_BOARD_KEY to disable restoring last opened board
 
 const saveToStorage = (data) => {
   try {
@@ -95,7 +96,7 @@ const List = ({ list, boardId, onUpdateList, onDeleteList, onAddTask, onUpdateTa
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
-  const [draggedTask, setDraggedTask] = useState<any>(null);
+  const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
 
   const filteredTasks = list.tasks.filter(task =>
     task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -129,14 +130,32 @@ const List = ({ list, boardId, onUpdateList, onDeleteList, onAddTask, onUpdateTa
 
   const handleDrop = (e: any) => {
     e.preventDefault();
-    if (draggedTask && draggedTask.listId !== list.id) {
-      onTaskMove(draggedTask.task, draggedTask.listId, list.id);
+    try {
+      const raw = e.dataTransfer.getData('application/json') || e.dataTransfer.getData('text/plain');
+      if (!raw) return;
+      const payload = JSON.parse(raw);
+      const { task, fromListId } = payload || {};
+      if (task && fromListId && fromListId !== list.id) {
+        onTaskMove(task, fromListId, list.id);
+      }
+    } catch (_) {
+      // ignore malformed drops
     }
-    setDraggedTask(null);
+    setDraggingTaskId(null);
   };
 
-  const handleTaskDragStart = (task) => {
-    setDraggedTask({ task, listId: list.id });
+  const handleTaskDragStart = (e: any, task: any) => {
+    try {
+      e.dataTransfer.setData('application/json', JSON.stringify({ task, fromListId: list.id }));
+    } catch (_) {
+      e.dataTransfer.setData('text/plain', JSON.stringify({ task, fromListId: list.id }));
+    }
+    e.dataTransfer.effectAllowed = 'move';
+    setDraggingTaskId(task.id);
+  };
+
+  const handleTaskDragEnd = () => {
+    setDraggingTaskId(null);
   };
 
   return (
@@ -177,7 +196,7 @@ const List = ({ list, boardId, onUpdateList, onDeleteList, onAddTask, onUpdateTa
           <TaskCard
             key={task.id}
             task={task}
-            isDragging={draggedTask?.task.id === task.id}
+            isDragging={draggingTaskId === task.id}
             onEdit={() => {
               const newTitle = prompt('Task title:', task.title);
               const newDescription = prompt('Task description:', task.description);
@@ -190,8 +209,8 @@ const List = ({ list, boardId, onUpdateList, onDeleteList, onAddTask, onUpdateTa
               }
             }}
             onDelete={() => onDeleteTask(list.id, task.id)}
-            onDragStart={() => handleTaskDragStart(task)}
-            onDragEnd={() => setDraggedTask(null)}
+            onDragStart={(e: any) => handleTaskDragStart(e, task)}
+            onDragEnd={handleTaskDragEnd}
           />
         ))}
       </div>
@@ -506,51 +525,31 @@ const Dashboard = ({ data, onCreateBoard, onSelectBoard, onDeleteBoard, onToggle
 const App = () => {
   const [data, setData] = useState<any>(initialData);
   const [currentBoard, setCurrentBoard] = useState<any>(null);
+  // Removed hydration ref since we no longer persist across reloads
 
-  // Load data from localStorage on component mount
+  // Initialize with a default board on mount (no localStorage restore)
   useEffect(() => {
-    const savedData = loadFromStorage();
-    if (savedData) {
-      setData(savedData);
-    } else {
-      // Initialize with default board
-      const defaultBoard = {
-        id: generateId(),
-        title: 'My First Board',
-        lists: [
-          {
-            id: generateId(),
-            title: 'To Do',
-            tasks: []
-          },
-          {
-            id: generateId(),
-            title: 'In Progress',
-            tasks: []
-          },
-          {
-            id: generateId(),
-            title: 'Done',
-            tasks: []
-          }
-        ]
-      };
+    const defaultBoard = {
+      id: generateId(),
+      title: 'My First Board',
+      lists: [
+        { id: generateId(), title: 'To Do', tasks: [] },
+        { id: generateId(), title: 'In Progress', tasks: [] },
+        { id: generateId(), title: 'Done', tasks: [] }
+      ]
+    };
 
-      const newData = {
-        ...initialData,
-        boards: { [defaultBoard.id]: defaultBoard },
-        boardOrder: [defaultBoard.id]
-      };
-      
-      setData(newData);
-      saveToStorage(newData);
-    }
+    const newData = {
+      ...initialData,
+      boards: { [defaultBoard.id]: defaultBoard },
+      boardOrder: [defaultBoard.id]
+    };
+
+    setData(newData);
+    // Do not save to localStorage
   }, []);
 
-  // Save data to localStorage whenever data changes
-  useEffect(() => {
-    saveToStorage(data);
-  }, [data]);
+  // Removed effect that saved data to localStorage on changes
 
   const createBoard = useCallback((title) => {
     const newBoard = {
@@ -783,9 +782,37 @@ const App = () => {
   }, [data]);
 
   const importData = useCallback((importedData) => {
-    if (window.confirm('This will replace all current data. Are you sure?')) {
-      setData(importedData);
-      setCurrentBoard(null);
+    // Merge imported boards into current session only (no persistence)
+    try {
+      if (!importedData || typeof importedData !== 'object') return;
+      const importedBoards = importedData.boards || {};
+      const importedOrder = Array.isArray(importedData.boardOrder) ? importedData.boardOrder : [];
+
+      setData(prev => {
+        const newBoards = { ...prev.boards };
+        const newOrder = [...prev.boardOrder];
+
+        Object.entries(importedBoards).forEach(([boardId, boardValue]: any) => {
+          if (!newBoards[boardId]) {
+            newBoards[boardId] = boardValue;
+          }
+        });
+
+        importedOrder.forEach((boardId: string) => {
+          if (!newOrder.includes(boardId) && newBoards[boardId]) {
+            newOrder.push(boardId);
+          }
+        });
+
+        return {
+          ...prev,
+          boards: newBoards,
+          boardOrder: newOrder,
+        };
+      });
+    } catch (e) {
+      console.error('Failed to import data:', e);
+      alert('Import failed. Ensure the JSON format matches the expected export format.');
     }
   }, []);
 
@@ -793,7 +820,9 @@ const App = () => {
     return (
       <Board
         board={currentBoard}
-        onBack={() => setCurrentBoard(null)}
+        onBack={() => {
+          setCurrentBoard(null);
+        }}
         onUpdateBoard={(updatedBoard) => {
           setData(prev => ({
             ...prev,
@@ -818,7 +847,9 @@ const App = () => {
     <Dashboard
       data={data}
       onCreateBoard={createBoard}
-      onSelectBoard={setCurrentBoard}
+      onSelectBoard={(board) => {
+        setCurrentBoard(board);
+      }}
       onDeleteBoard={deleteBoard}
       onToggleDarkMode={toggleDarkMode}
       onExportData={exportData}
