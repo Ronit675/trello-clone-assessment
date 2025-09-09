@@ -25,8 +25,8 @@ A modern, responsive task management application built with React, TypeScript, a
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/trello-clone.git
-   cd trello-clone
+   git clone https://github.com/Ronit675/trello-clone-assessment.git
+   cd trello-clone-assessment
    ```
 
 2. **Install dependencies**

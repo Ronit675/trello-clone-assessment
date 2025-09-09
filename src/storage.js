@@ -37,7 +37,7 @@ export const importDataFromFile = (file, callback) => {
     try {
       const importedData = JSON.parse(event.target.result);
       callback(importedData);
-    } catch (error) {
+    } catch {
       alert('Invalid JSON file');
     }
   };
