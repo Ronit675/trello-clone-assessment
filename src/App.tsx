@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, X, Edit3, Trash2, Search, Moon, Sun, Download, Upload } from 'lucide-react';
 // Utility functions for localStorage
 const STORAGE_KEY = 'trello-clone-data';
-// Removed CURRENT_BOARD_KEY to disable restoring last opened board
 
 const saveToStorage = (data) => {
   try {
@@ -525,9 +524,7 @@ const Dashboard = ({ data, onCreateBoard, onSelectBoard, onDeleteBoard, onToggle
 const App = () => {
   const [data, setData] = useState<any>(initialData);
   const [currentBoard, setCurrentBoard] = useState<any>(null);
-  // Removed hydration ref since we no longer persist across reloads
 
-  // Initialize with a default board on mount (no localStorage restore)
   useEffect(() => {
     const defaultBoard = {
       id: generateId(),
@@ -546,10 +543,7 @@ const App = () => {
     };
 
     setData(newData);
-    // Do not save to localStorage
   }, []);
-
-  // Removed effect that saved data to localStorage on changes
 
   const createBoard = useCallback((title) => {
     const newBoard = {
@@ -782,7 +776,6 @@ const App = () => {
   }, [data]);
 
   const importData = useCallback((importedData) => {
-    // Merge imported boards into current session only (no persistence)
     try {
       if (!importedData || typeof importedData !== 'object') return;
       const importedBoards = importedData.boards || {};
