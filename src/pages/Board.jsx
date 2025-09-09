@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Plus, ArrowLeft } from 'lucide-react';
-import { List } from './components.jsx';
-import { createDefaultList } from './types.js';
+import { List } from '../components.jsx';
+import { createDefaultList } from '../types.js';
 
 const Board = ({ 
   board, 
@@ -50,7 +50,7 @@ const Board = ({
               <ArrowLeft className="w-4 h-4" />
               Back
             </button>
-            <h1 className="text-xl sm:text-2xl font-bold text-[rgb(16_24_40)] dark:text-white truncate max-w-[60vw] sm:max-w-none">{board.title}</h1>
+            <h1 className={`text-xl sm:text-2xl font-bold text-[rgb(16_24_40)] ${darkMode ? 'text-white' : '#1f2937'} truncate max-w-[60vw] sm:max-w-none`}>{board.title}</h1>
           </div>
           
           <div className="flex items-center gap-3 sm:gap-4">

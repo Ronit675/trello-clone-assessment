@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Download, Upload, Sun, Moon } from 'lucide-react';
-import { importDataFromFile } from './storage.js';
+import { importDataFromFile } from '../storage.js';
 
 const Dashboard = ({ data, onCreateBoard, onSelectBoard, onDeleteBoard, onToggleDarkMode, onExportData, onImportData }) => {
   const [isCreatingBoard, setIsCreatingBoard] = useState(false);
@@ -23,10 +23,10 @@ const Dashboard = ({ data, onCreateBoard, onSelectBoard, onDeleteBoard, onToggle
   };
 
   return (
-    <div className={`min-h-screen ${data.darkMode ? 'dark bg-gray-900' : 'bg-slate-50'}`}>
+    <div className={`min-h-screen ${data.darkMode ? 'dark bg-gray-900' : 'bg-slate-50'} transition-all duration-200 delay-100`}>
       <div className="p-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[rgb(16 24 40)] dark:text-white">Task Manager Dashboard</h1>
+          <h1 className="text-3xl font-bold" style={{ color: data.darkMode ? '#ffffff' : '#1f2937' }}>Task Manager Dashboard</h1>
           <div className="mt-3 flex items-center gap-4 flex-wrap">
             <button
               onClick={onExportData}
