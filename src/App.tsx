@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, X, Edit3, Trash2, Search, Moon, Sun, Download, Upload } from 'lucide-react';
-
 // Utility functions for localStorage
 const STORAGE_KEY = 'trello-clone-data';
 
@@ -275,7 +274,7 @@ const Board = ({ board, onBack, onUpdateBoard, onDeleteBoard, onUpdateList, onDe
             >
               ← Back
             </button>
-            <h1 className="text-xl sm:text-2xl font-bold text-[rgb(16_24_40)] dark:text-white truncate max-w-[60vw] sm:max-w-none">{board.title}</h1>
+            <h1 className={`text-xl sm:text-2xl font-bold text-[rgb(16_24_40)] ${darkMode ? 'text-white' : 'text-gray-600'} truncate max-w-[60vw] sm:max-w-none`}>{board.title}</h1>
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="relative w-full max-w-xs sm:max-w-none">
@@ -388,10 +387,12 @@ const Dashboard = ({ data, onCreateBoard, onSelectBoard, onDeleteBoard, onToggle
   };
 
   return (
-    <div className={`min-h-screen ${data.darkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
+    <div className={`min-h-screen ${data.darkMode ? 'dark bg-gray-900' : 'bg-gray-100'} transition-all duration-200 delay-100`} 
+    style={{ transitionTimingFunction: 'linear' }}>
       <div className="p-6">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold dark:text-white">Task Manager Dashboard</h1>
+          <h1 className={`text-3xl font-bold ${data.darkMode ? 'text-white' : 'text-gray-600'}`}>
+            Task Manager Dashboard</h1>
           <div className="flex items-center gap-4">
             <button
               onClick={onExportData}
