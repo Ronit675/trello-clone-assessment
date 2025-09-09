@@ -6,7 +6,6 @@ import { createDefaultList } from '../types.js';
 const Board = ({ 
   board, 
   onBack, 
-  onUpdateBoard, 
   onDeleteBoard, 
   onUpdateList, 
   onDeleteList, 
