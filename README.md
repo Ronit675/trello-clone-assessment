@@ -13,6 +13,7 @@ A modern, responsive task management application built with React, TypeScript, a
 - **📤 Export/Import**: Backup and restore your data with JSON export/import
 - **📱 Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
 - **🎨 Drag & Drop**: Intuitive drag-and-drop interface for task management
+- **🧩 Modular Components**: Well-organized component structure with reusable Lists component
 
 ## 🚀 Getting Started
 
@@ -61,6 +62,23 @@ The built files will be in the `dist` directory, ready for deployment.
 - **Routing**: React Router DOM
 - **Linting**: ESLint
 
+## 🏗️ Component Architecture
+
+The application follows a modular component structure:
+
+- **Dashboard**: Main overview page displaying all boards
+- **Board**: Individual board view with lists and tasks
+- **Lists**: Container component managing multiple lists and list operations
+- **List**: Individual list component with task management
+- **TaskCard**: Individual task display and interaction
+- **Modal**: Reusable modal component for various dialogs
+
+### Key Components:
+
+- **`Lists.jsx`**: New modular component containing both individual List and Lists container functionality
+- **`components.jsx`**: Legacy component file with the original List implementation
+- **`useLocalStorage.js`**: Custom hook for managing local storage operations
+
 ## 📁 Project Structure
 
 ```
@@ -70,9 +88,17 @@ trello-clone/
 │   ├── main.jsx         # Application entry point
 │   ├── types.js         # Type definitions and utility functions
 │   ├── storage.js       # Local storage utilities
+│   ├── components.jsx   # Legacy components (List component)
 │   ├── pages/
 │   │   ├── Board.jsx    # Board view component
 │   │   └── Dashboard.jsx # Dashboard component
+│   ├── components/
+│   │   ├── index.js     # Component exports
+│   │   ├── Lists.jsx    # Lists component (new)
+│   │   ├── Modal.jsx    # Modal component
+│   │   └── TaskCard.jsx # Task card component
+│   ├── hooks/
+│   │   └── useLocalStorage.js # Custom hook for local storage
 │   ├── assets/          # Static assets
 │   ├── App.css          # Global styles
 │   └── index.css        # Base styles
@@ -93,8 +119,9 @@ trello-clone/
 
 ### Managing Lists
 - **Add List**: Click "Add another list" on any board
-- **Edit List**: Click on the list title to edit
+- **Edit List**: Click on the list title to edit (shows edit icon on hover)
 - **Delete List**: Click the trash icon next to the list title
+- **List Management**: The new Lists component provides enhanced list functionality with better organization
 
 ### Managing Tasks
 - **Add Task**: Click "Add a task" in any list
@@ -123,6 +150,19 @@ This application can be deployed to any static hosting service:
 - **Netlify**: Drag and drop the `dist` folder or connect your repository
 - **GitHub Pages**: Use GitHub Actions to deploy automatically
 - **Firebase Hosting**: Use Firebase CLI to deploy
+
+## 🔄 Recent Updates
+
+### Component Architecture Improvements
+- **New Lists Component**: Created a dedicated `Lists.jsx` component file for better organization
+- **Modular Structure**: Separated list functionality into reusable components
+- **Enhanced UI**: Added hover effects and improved visual feedback
+- **Better Organization**: Components are now properly organized in the `/components` directory
+
+### File Structure Changes
+- Added `/src/components/Lists.jsx` - New modular lists component
+- Updated `/src/components/index.js` - Added exports for new components
+- Maintained backward compatibility with existing `components.jsx`
 
 ## 🤝 Contributing
 
